@@ -1,9 +1,12 @@
 
 module.exports = {
-  entry: './src/client.js',
+  entry: {
+    bundle :'./src/client.js',
+    pollbundle:'./src/poll.js'
+  },
   output: {
     path: './public',
-    filename: 'bundle.js'
+    filename: '[name].js'
   },
   module: {
     loaders: [
@@ -12,7 +15,7 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'babel',
         query: {
-          presets: [ 'es2015', 'stage-1', 'react' ],
+          presets: [ 'es2015', 'stage-0', 'react' ],
           plugins: ["transform-runtime",
           "transform-class-properties"] // if any enter here.
         }

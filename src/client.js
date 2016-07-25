@@ -1,34 +1,54 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import $ from 'jquery';
 import {Button,Modal,Input,FormGroup,Checkbox} from 'react-bootstrap';
-var Data = {
-  "Question": "The Poll",
-  "Option 1": "Option 1",
-  "Option 2": "Option 2"
-}
-class Asd extends React.Component{
-  constructor(props){
-    super(props);
-    this.state = {};
+function post(path, params, method) {
+  method = method || "post";
+  var form = document.createElement("form");
+  form.setAttribute("method", method);
+  form.setAttribute("action", path);
+
+  for(var key in params) {
+    if(params.hasOwnProperty(key)) {
+      var hiddenField = document.createElement("input");
+      hiddenField.setAttribute("type", "hidden");
+      hiddenField.setAttribute("name", key);
+      hiddenField.setAttribute("value", params[key]);
+      form.appendChild(hiddenField);
+    }
   }
-  render(){
-    return(
-      <div>
-      1
-      </div>
-    );
-  }
+
+  document.body.appendChild(form);
+  form.submit();
 }
+
+var Data = [
+  {"username": "tienanh",
+  "Question": "First Poll1",
+  "Option 1": "choice 1 ",
+  "Option 2": "choice 2"}
+]
 const Poll = React.createClass({
   getInitialState(){
     return { data: Data};
   },
+  componentDidMount(){
+    $.ajax({
+      url: '/api2',
+      type: 'GET',
+      success: (dat) => {
+        console.log('user polls found, data: ');
+        console.log(dat);
+        this.setState({data: dat})
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
+  },
 
   formSubmit(question,option1,option2){
-    Data.Question = question;
-    Data["Option 1"] = option1;
-    Data["Option 2"] = option2;
-    console.log(Data);
+    Data[question] = {option1,option2}
     this.setState(Data);
   },
 
@@ -37,7 +57,6 @@ const Poll = React.createClass({
       <div>
       <CreatingPoll onSubmit = {this.formSubmit}/>
       <Content data={this.state.data}/>
-      <Asd/>
       </div>
     );
   }
@@ -48,20 +67,15 @@ const Content = React.createClass({
   },
 
   render(){
-    return(
-      <div>
-      <h4>{this.props.data.Question}</h4>
-      <FormGroup>
-      <Checkbox>
-      {this.props.data["Option 1"]}
-      </Checkbox>
-      <Checkbox>
-      {this.props.data["Option 2"]}
-      </Checkbox>
-      </FormGroup>
-      </div>
-    );
-  }
+    var nodes = this.props.data.map(function(node){
+      return <div><Button>{node.Question}</Button></div>
+    })
+  return(
+    <div>
+    {nodes}
+    </div>
+  );
+}
 });
 const CreatingPoll = React.createClass({
   getInitialState(){
@@ -101,8 +115,11 @@ const CreatingPoll = React.createClass({
 
   handleSubmit(e){
     e.preventDefault();
-    this.props.onSubmit(this.state.value1,this.state.value2,this.state.value3);
-    this.close();
+    if(this.state.value1&&this.state.value2&&this.state.value3){
+      this.props.onSubmit(this.state.value1,this.state.value2,this.state.value3);
+      post('/dashboard',{"Question": this.state.value1,"Option 1": this.state.value2,"Option 2":this.state.value3},"post");
+      this.close();
+    }
   },
 
   render(){
