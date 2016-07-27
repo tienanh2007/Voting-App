@@ -5,7 +5,7 @@ import path from 'path'
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 var MongoClient = mongodb.MongoClient
-var url1 = "mongodb://tienanh2007:Dien1234@ds047325.mlab.com:47325/votingapp"
+var url1 = MONGOLAB_URI;
 MongoClient.connect(url1, function (err, db) {
   if (err) throw err
   var collection = db.collection("users")
