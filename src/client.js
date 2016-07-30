@@ -17,7 +17,6 @@ function post(path, params, method) {
       form.appendChild(hiddenField);
     }
   }
-
   document.body.appendChild(form);
   form.submit();
 }
@@ -47,15 +46,10 @@ const Poll = React.createClass({
     });
   },
 
-  formSubmit(question,option1,option2){
-    Data[question] = {option1,option2}
-    this.setState(Data);
-  },
-
   render(){
     return(
       <div>
-      <CreatingPoll onSubmit = {this.formSubmit}/>
+      <CreatingPoll/>
       <Content data={this.state.data}/>
       </div>
     );
@@ -68,7 +62,7 @@ const Content = React.createClass({
 
   render(){
     var nodes = this.props.data.map(function(node){
-      return <div><Button>{node.Question}</Button></div>
+      return <div><Button href={"/polls/"+node._id}>{node.Question}</Button></div>
     })
   return(
     <div>
@@ -116,7 +110,6 @@ const CreatingPoll = React.createClass({
   handleSubmit(e){
     e.preventDefault();
     if(this.state.value1&&this.state.value2&&this.state.value3){
-      this.props.onSubmit(this.state.value1,this.state.value2,this.state.value3);
       post('/dashboard',{"Question": this.state.value1,"Option 1": this.state.value2,"Option 2":this.state.value3},"post");
       this.close();
     }

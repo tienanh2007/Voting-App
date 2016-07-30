@@ -77,7 +77,6 @@
 	      form.appendChild(hiddenField);
 	    }
 	  }
-
 	  document.body.appendChild(form);
 	  form.submit();
 	}
@@ -107,15 +106,11 @@
 	      }
 	    });
 	  },
-	  formSubmit: function formSubmit(question, option1, option2) {
-	    Data[question] = { option1: option1, option2: option2 };
-	    this.setState(Data);
-	  },
 	  render: function render() {
 	    return _react2.default.createElement(
 	      'div',
 	      null,
-	      _react2.default.createElement(CreatingPoll, { onSubmit: this.formSubmit }),
+	      _react2.default.createElement(CreatingPoll, null),
 	      _react2.default.createElement(Content, { data: this.state.data })
 	    );
 	  }
@@ -132,7 +127,7 @@
 	        null,
 	        _react2.default.createElement(
 	          _reactBootstrap.Button,
-	          null,
+	          { href: "/polls/" + node._id },
 	          node.Question
 	        )
 	      );
@@ -178,7 +173,6 @@
 	  handleSubmit: function handleSubmit(e) {
 	    e.preventDefault();
 	    if (this.state.value1 && this.state.value2 && this.state.value3) {
-	      this.props.onSubmit(this.state.value1, this.state.value2, this.state.value3);
 	      post('/dashboard', { "Question": this.state.value1, "Option 1": this.state.value2, "Option 2": this.state.value3 }, "post");
 	      this.close();
 	    }

@@ -2,6 +2,7 @@ import express from 'express';
 import mongodb from "mongodb";
 import bodyParser from 'body-parser';
 import path from 'path'
+var ObjectId = require('mongodb').ObjectID
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 var MongoClient = mongodb.MongoClient
@@ -32,24 +33,79 @@ var temp = null
 var user = {
   "login": false,
   "username": "",
-  "password": ""
+  "password": "",
+  "ip": ""
 }
-var id = "578fbbc24ded6682fb2fb879";
+var id;
+app.enable('trust proxy')
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/polls',express.static('public'))
+app.use(function(req,res,next){
+  if(!user.ip){
+    user.ip = req.ip;
+    console.log(user)
+  }
+  next()
+})
 app.get('/api',function(req,res){
   var data = offPolls.docs.filter(function(doc){
-    return doc._id== id;
+    return doc._id == id;
   })
-  res.status(200).send(data)
+  if(data[0]){
+    data[0].haveVoted = false;
+    for(var voters in data[0].voted){
+      if(data[0].voted[voters] == user.ip)
+        data[0].haveVoted = true;
+    }
+    res.status(200).send(data[0])
+  }
+  else{
+    res.status(404).send('Not Found')
+  }
 })
 app.get('/api2',function(req,res){
   var dataToSend = offPolls.docs.filter(function(poll){
     return poll.username == user.username
   })
-  res.status(200).send(dataToSend)
+  if(dataToSend){
+    res.status(200).send(dataToSend)
+  }
+  else{
+    res.status(404).send('Not Found')
+  }
+})
+app.post('/apiVote',function(req,res){
+  var first = false;
+  if(req.body.option == 1)
+  first = true;
+  MongoClient.connect(url1, function (err, db) {
+    if (err) throw err
+    var collection = db.collection("polls")
+    if (first){
+      collection.update({"_id": ObjectId(req.body._id)},{$inc:{"No1":1},$push:{ "voted": user.ip}})
+    }
+    else{
+      collection.update({"_id": ObjectId(req.body._id)},{$inc:{"No2":1},$push:{ "voted": user.ip}})
+    }
+
+    collection.find({}).toArray(function(err, docs) {
+      offPolls.docs = docs
+      res.redirect(req.get('referer'));
+      db.close()
+    })
+  })
+
 })
 app.get('/polls/:id',function(req,res){
-  res.sendFile(__dirname + "/public/poll.html")
+  id = req.params.id;
+  console.log(id)
+  res.sendFile(__dirname + "/public/poll.html",function(err){
+    if(err)
+    console.log(err)
+    else {
+      console.log('file sent')
+    }
+  })
 })
 app.get('/',function(req,res){
   res.send(state.docs)
@@ -67,16 +123,21 @@ app.post('/dashboard',function(req,res){
     "username": user.username,
     "Question": req.body.Question,
     "Option 1": req.body["Option 1"],
-    "Option 2": req.body["Option 2"]
+    "Option 2": req.body["Option 2"],
+    "No1": 0,
+    "No2": 0,
+    "voted": []
   }
   MongoClient.connect(url1, function (err, db) {
     if (err) throw err
     var collection = db.collection("polls")
     collection.insert(thing)
-    collection.find({},{_id:0}).toArray(function(err, docs) {
+    collection.find({}).toArray(function(err, docs) {
       offPolls.docs = docs
-      db.close()
+      res.redirect(req.get('referer'))
+      db.close();
     })
+
   })
 })
 app.get('/register',function(req,res){
