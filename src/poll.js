@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
 import {Button,Modal,Input,FormGroup,Checkbox} from 'react-bootstrap';
-import {Pie} from "react-chartjs"
+import {Pie} from "react-chartjs-2"
 import Chart from "chart.js"
 function post(path, params, method) {
   method = method || "post";
@@ -22,11 +22,13 @@ function post(path, params, method) {
   document.body.appendChild(form);
   form.submit();
 }
-var Data = [{
+var Data = {
   "Question": "The Polls",
   "Option 1": "Option 1",
-  "Option 2": "Option 2"
-}];
+  "Option 2": "Option 2",
+  "No1": 1,
+  "No2": 2,
+};
 const Poll = React.createClass({
   getInitialState(){
     return { data: Data};
@@ -49,7 +51,7 @@ const Poll = React.createClass({
     return(
       <div>
       <Content data={this.state.data}/>
-      <MyPie/>
+      <MyPie data={this.state.data}/>
       </div>
     );
   }
@@ -102,35 +104,37 @@ const Content = React.createClass({
     }
   }
 });
-var pieData = [{
-labels: [
-    "Red",
-    "Blue",
-    "Yellow"
-],
-datasets: [
-    {
-        data: [300, 50, 100],
-        backgroundColor: [
-            "#FF6384",
-            "#36A2EB",
-            "#FFCE56"
-        ],
-        hoverBackgroundColor: [
-            "#FF6384",
-            "#36A2EB",
-            "#FFCE56"
-        ]
-    }]
-}]
-var pieOption = {
-  animation:{
-    animateRotate: true
-  }
-}
+
 var MyPie = React.createClass({
-  render: function() {
-    return <Pie data={pieData} options={pieOption}/>
+  getInitialState(){
+    return {};
+  },
+
+  displayName: 'PieExample',
+
+  render() {
+    const pieData = {
+    	labels: [
+    		this.props.data["Option 1"],
+    		this.props.data["Option 2"]
+    	],
+    	datasets: [{
+    		data: [this.props.data.No1, this.props.data.No2],
+    		backgroundColor: [
+    		'#FF6384',
+    		'#36A2EB',
+    		],
+    		hoverBackgroundColor: [
+    		'#FF6384',
+    		'#36A2EB',
+    		]
+    	}]
+    }
+    return (
+      <div>
+        <Pie data={pieData} />
+      </div>
+    );
   }
 });
 ReactDOM.render(

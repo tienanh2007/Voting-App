@@ -33,6 +33,7 @@
     "react": "^15.0.1",
     "react-bootstrap": "^0.29.5",
     "react-chartjs": "^0.8.0",
+    "react-chartjs-2": "^1.1.7",
     "react-dom": "^15.0.1",
     "webpack": "^1.13.1"
   },
